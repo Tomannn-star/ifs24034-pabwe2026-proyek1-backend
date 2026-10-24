@@ -79,7 +79,22 @@ Pastikan **Bun** sudah terpasang (`bun --version`).
 
 ---
 
-## 🐳 5. Panduan Deploy ke Render / Railway (Docker)
+## 🌐 5. Panduan Deploy ke Vercel (100% Gratis)
+
+Backend ini sudah dikonfigurasi untuk berjalan langsung di **Vercel** menggunakan runtime resmi **Bun** (`bunVersion: "1.x"`):
+
+1. Buka [vercel.com](https://vercel.com) $\rightarrow$ klik **Add New...** $\rightarrow$ **Project**.
+2. Sambungkan repositori GitHub: `ifs24034-pabwe2026-proyek1-backend`.
+3. Vercel akan otomatis membaca file `vercel.json` dan menjalankan fungsi serverless dengan Bun.
+4. Klik **Deploy**.
+5. Setelah selesai, Vercel akan memberikan URL publik seperti:  
+   `https://ifs24034-pabwe2026-proyek1-backend.vercel.app`
+6. Endpoint pengujian kesehatan backend:  
+   `https://ifs24034-pabwe2026-proyek1-backend.vercel.app/api/health`
+
+---
+
+## 🐳 6. Panduan Deploy ke Docker / Render (Opsional)
 
 Repositori ini menyertakan `Dockerfile` berbasis image resmi Bun (`oven/bun:latest`).
 
