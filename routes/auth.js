@@ -5,6 +5,80 @@ import { generateToken, requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
+// POST /api/auth/register - Registrasi pengguna baru
+router.post("/register", (req, res) => {
+  try {
+    const { username, password, nama, kontak, role } = req.body;
+
+    if (!username || !password || !nama) {
+      return res.status(400).json({ error: "Username, password, dan nama lengkap wajib diisi" });
+    }
+
+    if (typeof username !== "string" || username.trim().length < 3) {
+      return res.status(400).json({ error: "Username minimal 3 karakter" });
+    }
+
+    if (typeof password !== "string" || password.length < 6) {
+      return res.status(400).json({ error: "Password minimal 6 karakter" });
+    }
+
+    // Periksa apakah username sudah terdaftar
+    const existingUser = db.query("SELECT id FROM users WHERE LOWER(username) = LOWER(?)").get(username.trim());
+    if (existingUser) {
+      return res.status(409).json({ error: "Username sudah digunakan, silakan pilih username lain" });
+    }
+
+    // Role default adalah 'anggota'
+    const assignedRole = role === "bendahara" ? "bendahara" : "anggota";
+    const passwordHash = bcrypt.hashSync(password, 10);
+
+    const result = db.transaction(() => {
+      let memberId = null;
+
+      // Jika role anggota, buatkan data anggota di tabel members
+      if (assignedRole === "anggota") {
+        const memberInsert = db.prepare("INSERT INTO members (nama, kontak, aktif) VALUES (?, ?, 1)");
+        const memberRes = memberInsert.run(nama.trim(), kontak ? kontak.trim() : null);
+        memberId = Number(memberRes.lastInsertRowid);
+      }
+
+      const userInsert = db.prepare("INSERT INTO users (username, password_hash, role, member_id) VALUES (?, ?, ?, ?)");
+      const userRes = userInsert.run(username.trim().toLowerCase(), passwordHash, assignedRole, memberId);
+      const userId = Number(userRes.lastInsertRowid);
+
+      return {
+        userId,
+        memberId,
+        username: username.trim().toLowerCase(),
+        role: assignedRole,
+        nama: nama.trim()
+      };
+    })();
+
+    const token = generateToken({
+      id: result.userId,
+      username: result.username,
+      role: result.role,
+      member_id: result.memberId,
+      nama: result.nama
+    });
+
+    res.status(201).json({
+      message: "Registrasi akun berhasil",
+      token,
+      user: {
+        id: result.userId,
+        username: result.username,
+        role: result.role,
+        member_id: result.memberId,
+        nama: result.nama
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Terjadi kesalahan saat memproses registrasi: " + err.message });
+  }
+});
+
 // POST /api/auth/login - Login pengguna
 router.post("/login", (req, res) => {
   try {

@@ -36,6 +36,49 @@ describe("Tahap 3: Autentikasi dan Pengingat KasPintar", () => {
   // 1. Pengujian Autentikasi (/api/auth)
   // -------------------------------------------------------------
   describe("Autentikasi Pengguna", () => {
+    test("Registrasi berhasil untuk pengguna baru dan otomatis menautkan member", async () => {
+      const res = await request(app)
+        .post("/api/auth/register")
+        .send({
+          username: "userbaru1",
+          password: "password123",
+          nama: "User Baru Satu",
+          kontak: "081234567890"
+        });
+
+      expect(res.status).toBe(201);
+      expect(typeof res.body.token).toBe("string");
+      expect(res.body.user).toBeDefined();
+      expect(res.body.user.username).toBe("userbaru1");
+      expect(res.body.user.nama).toBe("User Baru Satu");
+      expect(res.body.user.role).toBe("anggota");
+      expect(res.body.user.member_id).toBeGreaterThan(0);
+    });
+
+    test("Registrasi ditolak jika username sudah terdaftar (409)", async () => {
+      const res = await request(app)
+        .post("/api/auth/register")
+        .send({
+          username: "bendahara",
+          password: "password123",
+          nama: "Bendahara Kembar"
+        });
+
+      expect(res.status).toBe(409);
+      expect(res.body.error).toContain("sudah digunakan");
+    });
+
+    test("Registrasi ditolak jika data wajib tidak diisi (400)", async () => {
+      const res = await request(app)
+        .post("/api/auth/register")
+        .send({
+          username: "ab",
+          password: "123"
+        });
+
+      expect(res.status).toBe(400);
+    });
+
     test("Login berhasil untuk bendahara dan mengembalikan payload user valid tanpa password_hash", async () => {
       const res = await request(app)
         .post("/api/auth/login")
