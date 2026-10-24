@@ -66,12 +66,25 @@ export function initSchema(db) {
 }
 
 /**
+ * Mendeteksi path database yang aman untuk runtime lokal maupun Vercel Serverless.
+ * Pada Vercel Serverless, hanya direktori /tmp yang memiliki izin write.
+ */
+export function resolveDbPath() {
+  if (process.env.DB_PATH) return process.env.DB_PATH;
+  const isServerless = process.env.VERCEL === "1" || 
+                       process.env.VERCEL === "true" || 
+                       !!process.env.AWS_LAMBDA_FUNCTION_NAME || 
+                       !!process.env.NOW_REGION;
+  return isServerless ? "/tmp/kaspintar.db" : "./kaspintar.db";
+}
+
+/**
  * Membuat atau membuka koneksi database baru.
  * 
- * @param {string} [dbPath] - Path file SQLite, default dari process.env.DB_PATH atau './kaspintar.db'
+ * @param {string} [dbPath] - Path file SQLite, default dari resolveDbPath()
  * @returns {Database} Objek Database yang sudah diaktifkan foreign keys dan skemanya
  */
-export function createDatabase(dbPath = process.env.DB_PATH || "./kaspintar.db") {
+export function createDatabase(dbPath = resolveDbPath()) {
   const db = new Database(dbPath);
   initSchema(db);
   return db;

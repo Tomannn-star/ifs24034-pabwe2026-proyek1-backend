@@ -1,3 +1,9 @@
+# SQLite databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
 # dependencies (bun install)
 node_modules
 

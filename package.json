@@ -6,6 +6,7 @@
     "start": "bun server.js",
     "dev": "bun --watch server.js",
     "seed": "bun seed.js",
+    "build": "echo 'Backend ready for Vercel'",
     "test": "bun test test"
   },
   "dependencies": {
