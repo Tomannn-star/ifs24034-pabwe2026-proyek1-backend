@@ -40,6 +40,16 @@ app.use(cors({
 // Body parser JSON
 app.use(express.json());
 
+// Endpoint Root: Informasi status API KasPintar
+app.get("/", (req, res) => {
+  res.json({
+    status: "online",
+    message: "🚀 KasPintar REST API Server berjalan dengan baik di Vercel!",
+    health: "/api/health",
+    version: "1.0.0"
+  });
+});
+
 // Endpoint Health Check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
