@@ -8,7 +8,9 @@ const router = Router();
 // POST /api/auth/register - Registrasi pengguna baru
 router.post("/register", (req, res) => {
   try {
-    const { username, password, nama, kontak, role } = req.body;
+    const { username, password, kontak, role } = req.body;
+    const rawNama = req.body.nama || req.body.name;
+    const nama = rawNama && typeof rawNama === "string" ? rawNama.trim() : "";
 
     if (!username || !password || !nama) {
       return res.status(400).json({ error: "Username, password, dan nama lengkap wajib diisi" });
